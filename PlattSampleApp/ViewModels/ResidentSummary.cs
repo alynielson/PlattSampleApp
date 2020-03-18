@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace PlattSampleApp.Models
+namespace PlattSampleApp.ViewModels
 {
     public class ResidentSummary
     {

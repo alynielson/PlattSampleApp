@@ -1,6 +1,6 @@
 using System;
 
-namespace PlattSampleApp.Models
+namespace PlattSampleApp.ViewModels
 {
     public class ErrorViewModel
     {

@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PlattSampleApp.Models;
+using PlattSampleApp.ViewModels;
 
 namespace PlattSampleApp.Controllers
 {
