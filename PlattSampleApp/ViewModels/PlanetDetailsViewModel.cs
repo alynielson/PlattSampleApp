@@ -11,7 +11,7 @@ namespace PlattSampleApp.ViewModels
 
         public string Population { get; set; }
 
-        public int Diameter { get; set; }
+        public string Diameter { get; set; }
 
         public string Terrain { get; set; }
 

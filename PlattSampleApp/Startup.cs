@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PlattSampleApp.ApiServices;
+using PlattSampleApp.Services;
 
 namespace PlattSampleApp
 {
@@ -21,6 +23,14 @@ namespace PlattSampleApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient("swApiClient", client =>
+            {
+                client.BaseAddress = new Uri("https://swapi.co");
+            });
+
+            services.AddTransient<ISwApiService, SwApiService>();
+            services.AddTransient<IStarWarsService, StarWarsService>();
+            //TODO: decide if transient
             services.AddMvc();
         }
 

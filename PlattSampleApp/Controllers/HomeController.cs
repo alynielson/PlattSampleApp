@@ -2,25 +2,30 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using PlattSampleApp.Services;
 using PlattSampleApp.ViewModels;
 
 namespace PlattSampleApp.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IStarWarsService _starWarsService;
+
+        public HomeController(IStarWarsService starWarsService)
+        {
+            _starWarsService = starWarsService;
+        }
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult GetAllPlanets()
+        public async Task<IActionResult> GetAllPlanets()
         {
-            var model = new AllPlanetsViewModel();
-
-            // TODO: Implement this controller action
-
+            var model = await _starWarsService.GetAllPlanetsViewModel();
             return View(model);
         }
 
