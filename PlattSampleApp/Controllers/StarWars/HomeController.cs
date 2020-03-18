@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PlattSampleApp.Adapters;
+using PlattSampleApp.Adapters.StarWars;
 using PlattSampleApp.Models;
 using PlattSampleApp.ViewModels;
 
@@ -37,11 +33,11 @@ namespace PlattSampleApp.Controllers
             }
         }
 
-        public async Task<IActionResult> GetPlanetTwentyTwo(int planetid)
+        public async Task<IActionResult> GetResidentsOfPlanetNaboo(string planetname)
         {
             try
             {
-                var model = await _starWarsService.GetSinglePlanetViewModel(planetid);
+                var model = await _starWarsService.GetPlanetResidentsViewModel(planetname);
                 return View(model);
             }
             catch (RESTException ex)
@@ -50,11 +46,11 @@ namespace PlattSampleApp.Controllers
             }
         }
 
-        public async Task<IActionResult> GetResidentsOfPlanetNaboo(string planetname)
+        public async Task<IActionResult> GetPlanetTwentyTwo(int planetid)
         {
             try
             {
-                var model = await _starWarsService.GetPlanetResidentsViewModel(planetname);
+                var model = await _starWarsService.GetSinglePlanetViewModel(planetid);
                 return View(model);
             }
             catch (RESTException ex)

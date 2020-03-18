@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PlattSampleApp.ApiServices;
+using PlattSampleApp.ApiServices.StarWars;
 using PlattSampleApp.Adapters;
 
 namespace PlattSampleApp
@@ -28,7 +28,9 @@ namespace PlattSampleApp
                 client.BaseAddress = new Uri("https://swapi.co");
             });
 
-            services.AddTransient<ISwApiService, SwApiService>();
+            services.AddTransient<ISwPlanetApiService, SwPlanetApiService>();
+            services.AddTransient<ISwVehicleApiService, SwVehicleApiService>();
+            services.AddTransient<ISwPersonApiService, SwPersonApiService>();
             services.AddTransient<IStarWarsAdapter, StarWarsAdapter>();
             //TODO: decide if transient
             services.AddMvc();

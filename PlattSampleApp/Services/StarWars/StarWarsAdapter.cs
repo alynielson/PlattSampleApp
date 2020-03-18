@@ -1,4 +1,4 @@
-﻿using PlattSampleApp.ApiServices;
+﻿using PlattSampleApp.ApiServices.StarWars;
 using PlattSampleApp.Models.SwApi;
 using PlattSampleApp.ViewModels;
 using System;
@@ -6,20 +6,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlattSampleApp.Adapters
+namespace PlattSampleApp.Adapters.StarWars
 {
     public class StarWarsAdapter : IStarWarsAdapter
     {
-        private readonly ISwApiService _swApiService;
+        private readonly ISwPlanetApiService _planetService;
+        private readonly ISwPersonApiService _personService;
+        private readonly ISwVehicleApiService _vehicleService;
 
-        public StarWarsAdapter(ISwApiService swApiService)
+        public StarWarsAdapter(ISwPlanetApiService planetService, ISwPersonApiService personService, ISwVehicleApiService vehicleService)
         {
-            _swApiService = swApiService;
+            _planetService = planetService;
+            _personService = personService;
+            _vehicleService = vehicleService;
         }
 
         public async Task<AllPlanetsViewModel> GetAllPlanetsViewModel()
         {
-            var planets = await _swApiService.GetAllPlanets();
+            var planets = await _planetService.GetAllPlanets();
             if (planets is null)
             {
                 return null;
@@ -31,11 +35,11 @@ namespace PlattSampleApp.Adapters
             {
                 if (x.Diameter != null && double.TryParse(x.Diameter, out var diameter))
                 {
-                    withDiameter.Add((diameter, ConvertToPlanetDetailsViewModel(x)));
+                    withDiameter.Add((diameter, x.ConvertToPlanetDetailsViewModel()));
                 }
                 else
                 {
-                    noDiameter.Add(ConvertToPlanetDetailsViewModel(x));
+                    noDiameter.Add(x.ConvertToPlanetDetailsViewModel());
                 }
             });
 
@@ -51,7 +55,7 @@ namespace PlattSampleApp.Adapters
 
         public async Task<PlanetResidentsViewModel> GetPlanetResidentsViewModel(string planetName)
         {
-            var searchResult = await _swApiService.SearchPlanetsByName(planetName);
+            var searchResult = await _planetService.SearchPlanetsByName(planetName);
             var match = searchResult?.Results?
                 .FirstOrDefault(x => x.Name?.Equals(planetName, StringComparison.OrdinalIgnoreCase) == true 
                 && x.Residents != null && x.Residents.Count > 0);
@@ -59,26 +63,26 @@ namespace PlattSampleApp.Adapters
             {
                 return null;
             }
-            var residents = await Task.WhenAll(match.Residents.Select(async x => await _swApiService.GetResidentByEndpoint(x)));
+            var residents = await Task.WhenAll(match.Residents.Select(async x => await _personService.GetResidentByEndpoint(x)));
             return new PlanetResidentsViewModel
             {
-                Residents = residents?.OrderBy(x => x.Name).Select(x => ConvertToResidentSummary(x)).ToList()
+                Residents = residents?.OrderBy(x => x.Name).Select(x => x.ConvertToResidentSummary()).ToList()
             };
         }
 
         public async Task<SinglePlanetViewModel> GetSinglePlanetViewModel(int planetId)
         {
-            var planet = await _swApiService.GetPlanet(planetId);
+            var planet = await _planetService.GetPlanet(planetId);
             if (planet is null)
             {
                 return null;
             }
-            return ConvertToPlanetViewModel(planet);
+            return planet.ConvertToPlanetViewModel();
         }
 
         public async Task<VehicleSummaryViewModel> GetVehicleSummaryViewModel()
         {
-            var allVehicles = await _swApiService.GetAllVehicles();
+            var allVehicles = await _vehicleService.GetAllVehicles();
             if (allVehicles is null || allVehicles.Count == 0)
             {
                 return null;
@@ -105,45 +109,5 @@ namespace PlattSampleApp.Adapters
             };
         }
 
-        private ResidentSummary ConvertToResidentSummary(Resident resident)
-        {
-            return new ResidentSummary
-            {
-                Name = resident.Name,
-                EyeColor = resident.EyeColor,
-                Gender = resident.Gender,
-                HairColor = resident.HairColor,
-                Height = resident.Height,
-                SkinColor = resident.SkinColor,
-                Weight = resident.Mass
-            };
-        }
-
-        private SinglePlanetViewModel ConvertToPlanetViewModel(Planet planet)
-        {
-            return new SinglePlanetViewModel
-            {
-                Climate = planet.Climate,
-                Diameter = planet.Diameter,
-                Gravity = planet.Gravity,
-                LengthOfDay = planet.RotationPeriod,
-                LengthOfYear = planet.OrbitalPeriod,
-                Name = planet.Name,
-                Population = planet.Population,
-                SurfaceWaterPercentage = planet.SurfaceWater
-            };
-        }
-
-        private PlanetDetailsViewModel ConvertToPlanetDetailsViewModel(Planet planet)
-        {
-            return new PlanetDetailsViewModel
-            {
-                Diameter = planet.Diameter,
-                LengthOfYear = planet.OrbitalPeriod,
-                Name = planet.Name,
-                Population = planet.Population,
-                Terrain = planet.Terrain
-            };
-        }
     }
 }

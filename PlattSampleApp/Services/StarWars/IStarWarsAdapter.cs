@@ -1,10 +1,7 @@
 ﻿using PlattSampleApp.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlattSampleApp.Adapters
+namespace PlattSampleApp.Adapters.StarWars
 {
     public interface IStarWarsAdapter
     {
