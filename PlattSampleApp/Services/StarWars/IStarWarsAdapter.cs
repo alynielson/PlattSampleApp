@@ -12,5 +12,7 @@ namespace PlattSampleApp.Adapters.StarWars
         Task<PlanetResidentsViewModel> GetPlanetResidentsViewModel(string planetName);
 
         Task<VehicleSummaryViewModel> GetVehicleSummaryViewModel();
+
+        Task<bool> IsPlanetEvacuable(int planetId, double yearsToNextPlanet);
     }
 }

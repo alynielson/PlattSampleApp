@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlattSampleApp.ApiServices.StarWars;
 using PlattSampleApp.Adapters;
+using PlattSampleApp.Adapters.StarWars;
 
 namespace PlattSampleApp
 {
@@ -31,8 +32,9 @@ namespace PlattSampleApp
             services.AddTransient<ISwPlanetApiService, SwPlanetApiService>();
             services.AddTransient<ISwVehicleApiService, SwVehicleApiService>();
             services.AddTransient<ISwPersonApiService, SwPersonApiService>();
+            services.AddTransient<ISwStarshipService, SwStarshipService>();
             services.AddTransient<IStarWarsAdapter, StarWarsAdapter>();
-            //TODO: decide if transient
+            
             services.AddMvc();
         }
 

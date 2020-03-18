@@ -1,5 +1,7 @@
 ﻿using PlattSampleApp.ApiServices.StarWars;
+using PlattSampleApp.Models;
 using PlattSampleApp.Models.SwApi;
+using PlattSampleApp.Services.StarWars;
 using PlattSampleApp.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -13,12 +15,15 @@ namespace PlattSampleApp.Adapters.StarWars
         private readonly ISwPlanetApiService _planetService;
         private readonly ISwPersonApiService _personService;
         private readonly ISwVehicleApiService _vehicleService;
+        private readonly ISwStarshipService _starshipService;
 
-        public StarWarsAdapter(ISwPlanetApiService planetService, ISwPersonApiService personService, ISwVehicleApiService vehicleService)
+        public StarWarsAdapter(ISwPlanetApiService planetService, ISwPersonApiService personService, 
+            ISwVehicleApiService vehicleService, ISwStarshipService starshipService)
         {
             _planetService = planetService;
             _personService = personService;
             _vehicleService = vehicleService;
+            _starshipService = starshipService;
         }
 
         public async Task<AllPlanetsViewModel> GetAllPlanetsViewModel()
@@ -26,7 +31,7 @@ namespace PlattSampleApp.Adapters.StarWars
             var planets = await _planetService.GetAllPlanets();
             if (planets is null)
             {
-                return null;
+                return new AllPlanetsViewModel();
             }
 
             var withDiameter = new List<(double diameter, PlanetDetailsViewModel planet)>();
@@ -61,7 +66,7 @@ namespace PlattSampleApp.Adapters.StarWars
                 && x.Residents != null && x.Residents.Count > 0);
             if (match is null)
             {
-                return null;
+                return new PlanetResidentsViewModel();
             }
             var residents = await Task.WhenAll(match.Residents.Select(async x => await _personService.GetResidentByEndpoint(x)));
             return new PlanetResidentsViewModel
@@ -75,7 +80,7 @@ namespace PlattSampleApp.Adapters.StarWars
             var planet = await _planetService.GetPlanet(planetId);
             if (planet is null)
             {
-                return null;
+                return new SinglePlanetViewModel();
             }
             return planet.ConvertToPlanetViewModel();
         }
@@ -85,29 +90,50 @@ namespace PlattSampleApp.Adapters.StarWars
             var allVehicles = await _vehicleService.GetAllVehicles();
             if (allVehicles is null || allVehicles.Count == 0)
             {
-                return null;
+                return new VehicleSummaryViewModel();
             }
             var knownCostVehicles = allVehicles.Where(x => x.CostInCredits != null && double.TryParse(x.CostInCredits, out var _)).ToList();
             var knownCostByMfgr = knownCostVehicles.GroupBy(x => x.Manufacturer);
 
             return new VehicleSummaryViewModel
             {
-                Details = knownCostByMfgr.Select(x => ConvertToVehicleStatsViewModel(x))
+                Details = knownCostByMfgr.Select(x => x.ConvertToVehicleStatsViewModel())
                     .OrderByDescending(x => x.VehicleCount).ThenByDescending(x => x.AverageCost).ToList(),
                 ManufacturerCount = knownCostByMfgr.ToList().Count,
                 VehicleCount = knownCostVehicles.Count
             };
         }
 
-        private VehicleStatsViewModel ConvertToVehicleStatsViewModel(IGrouping<string, Vehicle> vehiclesPerManufacturer)
+        public async Task<bool> IsPlanetEvacuable(int planetId, double yearsToNextPlanet)
         {
-            return new VehicleStatsViewModel
+            var planet = await _planetService.GetPlanet(planetId);
+            if (planet is null)
             {
-                AverageCost = vehiclesPerManufacturer.Average(x => double.Parse(x.CostInCredits)),
-                ManufacturerName = vehiclesPerManufacturer.Key,
-                VehicleCount = vehiclesPerManufacturer.ToList().Count
-            };
-        }
+                throw new RESTException("Planet not found.", System.Net.HttpStatusCode.NotFound, null);
+            }
 
+            if (planet.Residents is null || planet.Residents.Count == 0)
+            {
+                // No one is on the planet. 
+                return true;
+            }
+
+            var residents = (await Task.WhenAll(planet.Residents.Select(async x => await _personService.GetResidentByEndpoint(x))))?.ToList();
+            var pilotableStarships = residents.Where(x => x.Starships != null && x.Starships.Count > 0).SelectMany(x => x.Starships).Distinct().ToList();
+            if (pilotableStarships is null || pilotableStarships.Count == 0)
+            {
+                // Cannot escape with no starship.
+                return false;
+            }
+
+            var starships = (await Task.WhenAll(pilotableStarships.Select(async x => await _starshipService.GetStarshipByEndpoint(x))))?.ToList();
+
+            if (starships is null || starships.Count == 0)
+            {
+                return false;
+            }
+
+            return starships.Any(x => x.CanEvacuateToNextPlanet(residents, yearsToNextPlanet));
+        }
     }
 }

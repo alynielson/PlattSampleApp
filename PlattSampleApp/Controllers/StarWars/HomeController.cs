@@ -72,6 +72,18 @@ namespace PlattSampleApp.Controllers
             }
         }
 
+        public async Task<IActionResult> IsPlanetEvacuable(int planetId, double yearsToNextPlanet)
+        {
+            try
+            {
+                return View(await _starWarsService.IsPlanetEvacuable(planetId, yearsToNextPlanet));
+            }
+            catch (RESTException ex)
+            {
+                return Error(ex.Message, ex.StatusCode.ToString());
+            }
+        }
+
         public IActionResult Error(string reason, string code)
         {
             return View(new ErrorViewModel
