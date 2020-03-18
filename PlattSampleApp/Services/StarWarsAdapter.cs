@@ -22,7 +22,7 @@ namespace PlattSampleApp.Adapters
             var planets = await _swApiService.GetAllPlanets();
             if (planets is null)
             {
-                return new AllPlanetsViewModel();
+                return null;
             }
 
             var withDiameter = new List<(double diameter, PlanetDetailsViewModel planet)>();
@@ -49,6 +49,23 @@ namespace PlattSampleApp.Adapters
             }; 
         }
 
+        public async Task<PlanetResidentsViewModel> GetPlanetResidentsViewModel(string planetName)
+        {
+            var searchResult = await _swApiService.SearchPlanetsByName(planetName);
+            var match = searchResult?.Results?
+                .FirstOrDefault(x => x.Name?.Equals(planetName, StringComparison.OrdinalIgnoreCase) == true 
+                && x.Residents != null && x.Residents.Count > 0);
+            if (match is null)
+            {
+                return null;
+            }
+            var residents = await Task.WhenAll(match.Residents.Select(async x => await _swApiService.GetResidentByEndpoint(x)));
+            return new PlanetResidentsViewModel
+            {
+                Residents = residents?.Select(x => ConvertToResidentSummary(x)).ToList()
+            };
+        }
+
         public async Task<SinglePlanetViewModel> GetSinglePlanetViewModel(int planetId)
         {
             var planet = await _swApiService.GetPlanet(planetId);
@@ -57,6 +74,20 @@ namespace PlattSampleApp.Adapters
                 return null;
             }
             return ConvertToPlanetViewModel(planet);
+        }
+
+        private ResidentSummary ConvertToResidentSummary(Resident resident)
+        {
+            return new ResidentSummary
+            {
+                Name = resident.Name,
+                EyeColor = resident.EyeColor,
+                Gender = resident.Gender,
+                HairColor = resident.HairColor,
+                Height = resident.Height,
+                SkinColor = resident.SkinColor,
+                Weight = resident.Mass
+            };
         }
 
         private SinglePlanetViewModel ConvertToPlanetViewModel(Planet planet)

@@ -14,5 +14,9 @@ namespace PlattSampleApp.ApiServices
         Task<List<Planet>> GetAllPlanets();
 
         Task<Planet> GetPlanet(int planetId);
+
+        Task<PagedResult<Planet>> SearchPlanetsByName(string name);
+
+        Task<Resident> GetResidentByEndpoint(string endpoint);
     }
 }

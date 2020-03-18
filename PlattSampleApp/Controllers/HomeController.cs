@@ -35,12 +35,9 @@ namespace PlattSampleApp.Controllers
             return View(model);
         }
 
-        public IActionResult GetResidentsOfPlanetNaboo(string planetname)
+        public async Task<IActionResult> GetResidentsOfPlanetNaboo(string planetname)
         {
-            var model = new PlanetResidentsViewModel();
-
-            // TODO: Implement this controller action
-
+            var model = await _starWarsService.GetPlanetResidentsViewModel(planetname);
             return View(model);
         }
 
