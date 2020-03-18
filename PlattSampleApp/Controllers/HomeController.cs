@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PlattSampleApp.Adapters;
+using PlattSampleApp.Models;
 using PlattSampleApp.ViewModels;
 
 namespace PlattSampleApp.Controllers
@@ -25,31 +26,64 @@ namespace PlattSampleApp.Controllers
 
         public async Task<IActionResult> GetAllPlanets()
         {
-            var model = await _starWarsService.GetAllPlanetsViewModel();
-            return View(model);
+            try
+            {
+                var model = await _starWarsService.GetAllPlanetsViewModel();
+                return View(model);
+            }
+            catch (RESTException ex)
+            {
+                return Error(ex.Message, ex.StatusCode.ToString());
+            }
         }
 
         public async Task<IActionResult> GetPlanetTwentyTwo(int planetid)
         {
-            var model = await _starWarsService.GetSinglePlanetViewModel(planetid);
-            return View(model);
+            try
+            {
+                var model = await _starWarsService.GetSinglePlanetViewModel(planetid);
+                return View(model);
+            }
+            catch (RESTException ex)
+            {
+                return Error(ex.Message, ex.StatusCode.ToString());
+            }
         }
 
         public async Task<IActionResult> GetResidentsOfPlanetNaboo(string planetname)
         {
-            var model = await _starWarsService.GetPlanetResidentsViewModel(planetname);
-            return View(model);
+            try
+            {
+                var model = await _starWarsService.GetPlanetResidentsViewModel(planetname);
+                return View(model);
+            }
+            catch (RESTException ex)
+            {
+                return Error(ex.Message, ex.StatusCode.ToString());
+            }
         }
 
         public async Task<IActionResult> VehicleSummary()
         {
-            var model = await _starWarsService.GetVehicleSummaryViewModel();
-            return View(model);
+            try
+            {
+                var model = await _starWarsService.GetVehicleSummaryViewModel();
+                return View(model);
+            }
+            catch (RESTException ex)
+            {
+                return Error(ex.Message, ex.StatusCode.ToString());
+            }
         }
 
-        public IActionResult Error()
+        public IActionResult Error(string reason, string code)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                StatusCode = code,
+                Reason = reason
+            });
         }
     }
 }

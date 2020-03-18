@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
 using PlattSampleApp.Common;
+using PlattSampleApp.Models;
 
 namespace PlattSampleApp.ApiServices
 {
@@ -56,7 +57,7 @@ namespace PlattSampleApp.ApiServices
             }
             else
             {
-                return null;
+                throw new RESTException(response.ReasonPhrase, response.StatusCode, null);
             }
         }
 
@@ -77,7 +78,7 @@ namespace PlattSampleApp.ApiServices
             }
             else
             {
-                return null;
+                throw new RESTException(response.ReasonPhrase, response.StatusCode, null);
             }
         }
 
@@ -98,11 +99,11 @@ namespace PlattSampleApp.ApiServices
             }
             else
             {
-                return null;
+                throw new RESTException(response.ReasonPhrase, response.StatusCode, null);
             }
         }
 
-        public async Task<PagedResult<Planet>> GetPlanetsPage(HttpClient httpClient, string nextPageEndpoint)
+        private async Task<PagedResult<Planet>> GetPlanetsPage(HttpClient httpClient, string nextPageEndpoint)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, nextPageEndpoint);
 
@@ -117,16 +118,16 @@ namespace PlattSampleApp.ApiServices
             }
             else
             {
-                return null;
+                throw new RESTException(response.ReasonPhrase, response.StatusCode, null);
             }
         }
 
-        public async Task<PagedResult<Vehicle>> GetVehiclesPage(HttpClient httpClient, string nextPageEndpoint)
+        private async Task<PagedResult<Vehicle>> GetVehiclesPage(HttpClient httpClient, string nextPageEndpoint)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, nextPageEndpoint);
 
             var response = await httpClient.SendAsync(request);
-
+            
             if (response.IsSuccessStatusCode)
             {
                 using (var responseStream = await response.Content.ReadAsStreamAsync())
@@ -136,7 +137,7 @@ namespace PlattSampleApp.ApiServices
             }
             else
             {
-                return null;
+                throw new RESTException(response.ReasonPhrase, response.StatusCode, null);
             }
         }
 
