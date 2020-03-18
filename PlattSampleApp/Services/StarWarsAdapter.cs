@@ -62,7 +62,7 @@ namespace PlattSampleApp.Adapters
             var residents = await Task.WhenAll(match.Residents.Select(async x => await _swApiService.GetResidentByEndpoint(x)));
             return new PlanetResidentsViewModel
             {
-                Residents = residents?.Select(x => ConvertToResidentSummary(x)).ToList()
+                Residents = residents?.OrderBy(x => x.Name).Select(x => ConvertToResidentSummary(x)).ToList()
             };
         }
 
