@@ -5,16 +5,16 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PlattSampleApp.Services;
+using PlattSampleApp.Adapters;
 using PlattSampleApp.ViewModels;
 
 namespace PlattSampleApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IStarWarsService _starWarsService;
+        private readonly IStarWarsAdapter _starWarsService;
 
-        public HomeController(IStarWarsService starWarsService)
+        public HomeController(IStarWarsAdapter starWarsService)
         {
             _starWarsService = starWarsService;
         }
@@ -29,12 +29,9 @@ namespace PlattSampleApp.Controllers
             return View(model);
         }
 
-        public IActionResult GetPlanetTwentyTwo(int planetid)
+        public async Task<IActionResult> GetPlanetTwentyTwo(int planetid)
         {
-            var model = new SinglePlanetViewModel();
-
-            // TODO: Implement this controller action
-
+            var model = await _starWarsService.GetSinglePlanetViewModel(planetid);
             return View(model);
         }
 

@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlattSampleApp.Services
+namespace PlattSampleApp.Adapters
 {
-    public interface IStarWarsService
+    public interface IStarWarsAdapter
     {
         Task<AllPlanetsViewModel> GetAllPlanetsViewModel();
+
+        Task<SinglePlanetViewModel> GetSinglePlanetViewModel(int planetId);
     }
 }

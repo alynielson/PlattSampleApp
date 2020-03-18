@@ -6,13 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlattSampleApp.Services
+namespace PlattSampleApp.Adapters
 {
-    public class StarWarsService : IStarWarsService
+    public class StarWarsAdapter : IStarWarsAdapter
     {
         private readonly ISwApiService _swApiService;
 
-        public StarWarsService(ISwApiService swApiService)
+        public StarWarsAdapter(ISwApiService swApiService)
         {
             _swApiService = swApiService;
         }
@@ -31,11 +31,11 @@ namespace PlattSampleApp.Services
             {
                 if (x.Diameter != null && double.TryParse(x.Diameter, out var diameter))
                 {
-                    withDiameter.Add((diameter, ConvertToViewModel(x)));
+                    withDiameter.Add((diameter, ConvertToPlanetDetailsViewModel(x)));
                 }
                 else
                 {
-                    noDiameter.Add(ConvertToViewModel(x));
+                    noDiameter.Add(ConvertToPlanetDetailsViewModel(x));
                 }
             });
 
@@ -49,7 +49,32 @@ namespace PlattSampleApp.Services
             }; 
         }
 
-        private PlanetDetailsViewModel ConvertToViewModel(Planet planet)
+        public async Task<SinglePlanetViewModel> GetSinglePlanetViewModel(int planetId)
+        {
+            var planet = await _swApiService.GetPlanet(planetId);
+            if (planet is null)
+            {
+                return null;
+            }
+            return ConvertToPlanetViewModel(planet);
+        }
+
+        private SinglePlanetViewModel ConvertToPlanetViewModel(Planet planet)
+        {
+            return new SinglePlanetViewModel
+            {
+                Climate = planet.Climate,
+                Diameter = planet.Diameter,
+                Gravity = planet.Gravity,
+                LengthOfDay = planet.RotationPeriod,
+                LengthOfYear = planet.OrbitalPeriod,
+                Name = planet.Name,
+                Population = planet.Population,
+                SurfaceWaterPercentage = planet.SurfaceWater
+            };
+        }
+
+        private PlanetDetailsViewModel ConvertToPlanetDetailsViewModel(Planet planet)
         {
             return new PlanetDetailsViewModel
             {

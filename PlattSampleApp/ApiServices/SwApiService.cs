@@ -13,7 +13,6 @@ namespace PlattSampleApp.ApiServices
     public class SwApiService : ISwApiService
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private static JsonSerializer _jsonSerializer = new JsonSerializer();
 
         public SwApiService(IHttpClientFactory httpClientFactory)
         {
@@ -22,28 +21,42 @@ namespace PlattSampleApp.ApiServices
 
         public async Task<List<Planet>> GetAllPlanets()
         {
-            try
+            var client = _httpClientFactory.CreateClient("swApiClient");
+            var endpoint = "/api/planets";
+            var allPlanets = new List<Planet>();
+            PagedResult<Planet> pagedResult = null;
+            do
             {
-                var client = _httpClientFactory.CreateClient("swApiClient");
-                var endpoint = "/api/planets";
-                var allPlanets = new List<Planet>();
-                PagedResult<Planet> pagedResult = null;
-                do
+                pagedResult = await GetPlanets(client, endpoint);
+                if (pagedResult?.Results is null || pagedResult.Results.Count == 0)
                 {
-                    pagedResult = await GetPlanets(client, endpoint);
-                    if (pagedResult?.Results is null || pagedResult.Results.Count == 0)
-                    {
-                        break;
-                    }
-                    allPlanets.AddRange(pagedResult.Results);
-                    endpoint = "/api/planets" + pagedResult.Next?.Substring(pagedResult.Next.LastIndexOf('/'));
-                } while (pagedResult.Next != null);
+                    break;
+                }
+                allPlanets.AddRange(pagedResult.Results);
+                endpoint = "/api/planets" + pagedResult.Next?.Substring(pagedResult.Next.LastIndexOf('/'));
+            } while (pagedResult.Next != null);
 
-                return allPlanets;
-            }
-            catch (Exception ex)
+            return allPlanets;
+        }
+
+        public async Task<Planet> GetPlanet(int planetId)
+        {
+            var client = _httpClientFactory.CreateClient("swApiClient");
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/api/planets/{planetId}");
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
             {
-                return new List<Planet>();
+                using (var responseStream = await response.Content.ReadAsStreamAsync())
+                {
+                    return JsonStrategy.ReadJsonFromStream<Planet>(responseStream);
+                }
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -62,7 +75,6 @@ namespace PlattSampleApp.ApiServices
             }
             else
             {
-                // TODO: error here
                 return null;
             }
         }

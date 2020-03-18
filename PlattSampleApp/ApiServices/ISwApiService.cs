@@ -12,5 +12,7 @@ namespace PlattSampleApp.ApiServices
         Task<PagedResult<Planet>> GetPlanets(HttpClient httpClient, string nextEndpoint);
 
         Task<List<Planet>> GetAllPlanets();
+
+        Task<Planet> GetPlanet(int planetId);
     }
 }

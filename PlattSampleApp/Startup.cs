@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlattSampleApp.ApiServices;
-using PlattSampleApp.Services;
+using PlattSampleApp.Adapters;
 
 namespace PlattSampleApp
 {
@@ -29,7 +29,7 @@ namespace PlattSampleApp
             });
 
             services.AddTransient<ISwApiService, SwApiService>();
-            services.AddTransient<IStarWarsService, StarWarsService>();
+            services.AddTransient<IStarWarsAdapter, StarWarsAdapter>();
             //TODO: decide if transient
             services.AddMvc();
         }
