@@ -76,6 +76,35 @@ namespace PlattSampleApp.Adapters
             return ConvertToPlanetViewModel(planet);
         }
 
+        public async Task<VehicleSummaryViewModel> GetVehicleSummaryViewModel()
+        {
+            var allVehicles = await _swApiService.GetAllVehicles();
+            if (allVehicles is null || allVehicles.Count == 0)
+            {
+                return null;
+            }
+            var knownCostVehicles = allVehicles.Where(x => x.CostInCredits != null && double.TryParse(x.CostInCredits, out var _)).ToList();
+            var knownCostByMfgr = knownCostVehicles.GroupBy(x => x.Manufacturer);
+
+            return new VehicleSummaryViewModel
+            {
+                Details = knownCostByMfgr.Select(x => ConvertToVehicleStatsViewModel(x))
+                    .OrderByDescending(x => x.VehicleCount).ThenByDescending(x => x.AverageCost).ToList(),
+                ManufacturerCount = knownCostByMfgr.ToList().Count,
+                VehicleCount = knownCostVehicles.Count
+            };
+        }
+
+        private VehicleStatsViewModel ConvertToVehicleStatsViewModel(IGrouping<string, Vehicle> vehiclesPerManufacturer)
+        {
+            return new VehicleStatsViewModel
+            {
+                AverageCost = vehiclesPerManufacturer.Average(x => double.Parse(x.CostInCredits)),
+                ManufacturerName = vehiclesPerManufacturer.Key,
+                VehicleCount = vehiclesPerManufacturer.ToList().Count
+            };
+        }
+
         private ResidentSummary ConvertToResidentSummary(Resident resident)
         {
             return new ResidentSummary

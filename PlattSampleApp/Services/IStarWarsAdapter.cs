@@ -13,5 +13,7 @@ namespace PlattSampleApp.Adapters
         Task<SinglePlanetViewModel> GetSinglePlanetViewModel(int planetId);
 
         Task<PlanetResidentsViewModel> GetPlanetResidentsViewModel(string planetName);
+
+        Task<VehicleSummaryViewModel> GetVehicleSummaryViewModel();
     }
 }

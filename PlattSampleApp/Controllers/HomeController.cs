@@ -41,12 +41,9 @@ namespace PlattSampleApp.Controllers
             return View(model);
         }
 
-        public IActionResult VehicleSummary()
+        public async Task<IActionResult> VehicleSummary()
         {
-            var model = new VehicleSummaryViewModel();
-
-            // TODO: Implement this controller action
-
+            var model = await _starWarsService.GetVehicleSummaryViewModel();
             return View(model);
         }
 

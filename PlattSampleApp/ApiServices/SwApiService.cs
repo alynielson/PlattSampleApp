@@ -27,7 +27,7 @@ namespace PlattSampleApp.ApiServices
             PagedResult<Planet> pagedResult = null;
             do
             {
-                pagedResult = await GetPlanets(client, endpoint);
+                pagedResult = await GetPlanetsPage(client, endpoint);
                 if (pagedResult?.Results is null || pagedResult.Results.Count == 0)
                 {
                     break;
@@ -102,7 +102,7 @@ namespace PlattSampleApp.ApiServices
             }
         }
 
-        public async Task<PagedResult<Planet>> GetPlanets(HttpClient httpClient, string nextPageEndpoint)
+        public async Task<PagedResult<Planet>> GetPlanetsPage(HttpClient httpClient, string nextPageEndpoint)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, nextPageEndpoint);
 
@@ -119,6 +119,45 @@ namespace PlattSampleApp.ApiServices
             {
                 return null;
             }
+        }
+
+        public async Task<PagedResult<Vehicle>> GetVehiclesPage(HttpClient httpClient, string nextPageEndpoint)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, nextPageEndpoint);
+
+            var response = await httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using (var responseStream = await response.Content.ReadAsStreamAsync())
+                {
+                    return JsonStrategy.ReadJsonFromStream<PagedResult<Vehicle>>(responseStream);
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<Vehicle>> GetAllVehicles()
+        {
+            var client = _httpClientFactory.CreateClient("swApiClient");
+            var endpoint = "/api/vehicles";
+            var allVehicles = new List<Vehicle>();
+            PagedResult<Vehicle> pagedResult = null;
+            do
+            {
+                pagedResult = await GetVehiclesPage(client, endpoint);
+                if (pagedResult?.Results is null || pagedResult.Results.Count == 0)
+                {
+                    break;
+                }
+                allVehicles.AddRange(pagedResult.Results);
+                endpoint = "/api/vehicles" + pagedResult.Next?.Substring(pagedResult.Next.LastIndexOf('/'));
+            } while (pagedResult.Next != null);
+
+            return allVehicles;
         }
     }
 }

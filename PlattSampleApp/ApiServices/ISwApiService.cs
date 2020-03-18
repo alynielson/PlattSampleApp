@@ -9,7 +9,7 @@ namespace PlattSampleApp.ApiServices
 {
     public interface ISwApiService
     {
-        Task<PagedResult<Planet>> GetPlanets(HttpClient httpClient, string nextEndpoint);
+        Task<PagedResult<Planet>> GetPlanetsPage(HttpClient httpClient, string nextEndpoint);
 
         Task<List<Planet>> GetAllPlanets();
 
@@ -18,5 +18,9 @@ namespace PlattSampleApp.ApiServices
         Task<PagedResult<Planet>> SearchPlanetsByName(string name);
 
         Task<Resident> GetResidentByEndpoint(string endpoint);
+
+        Task<List<Vehicle>> GetAllVehicles();
+
+        Task<PagedResult<Vehicle>> GetVehiclesPage(HttpClient httpClient, string nextPageEndpoint);
     }
 }
