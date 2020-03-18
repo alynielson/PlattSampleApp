@@ -72,6 +72,12 @@ namespace PlattSampleApp.Controllers
             }
         }
 
+        /// <summary>
+        /// Checks if an entire planet's population could hypothetically evacuate the planet on a starship and make it to the closest planet.
+        /// </summary>
+        /// <param name="planetId"></param>
+        /// <param name="yearsToNextPlanet"></param>
+        /// <returns></returns>
         public async Task<IActionResult> IsPlanetEvacuable(int planetId, double yearsToNextPlanet)
         {
             try
